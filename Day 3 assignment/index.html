@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+    <title>QuickNotes</title>
+  </head>
+  <body>
+    <header>
+      <h1>QuickNotes</h1>
+      <p>Your personal note-taking app</p>
+ 
+    <main>
+      <section class="note-section">
+        <h2>Take a Note</h2>
+        <form id="note-form">
+          <textarea id="note-input" placeholder="Write your note here..." required></textarea>
+          <button type="submit">Add Note</button>
+        </form>
+      </section>
+
+      <section class="notes-list-section">
+        <h2>Your Notes</h2>
+        <ul id="notes-list"></ul>
+      </section>
+    </main>
+ 
+    <footer>
+      <p>&copy; 2026 QuickNotes. Built during Web Foundations.</p>
+    </footer>
+  </body>
+</html>
