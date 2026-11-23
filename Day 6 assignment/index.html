@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>School Database SQL</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 980px; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; }
+    h1 { margin-bottom: .25rem; }
+    .intro { color: color-mix(in srgb, CanvasText 72%, Canvas); }
+    pre { overflow-x: auto; padding: 1rem; border: 1px solid color-mix(in srgb, CanvasText 20%, Canvas); border-radius: .5rem; background: color-mix(in srgb, Canvas 94%, CanvasText); }
+    code { font: 14px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    a { color: LinkText; }
+    .callout { padding: .75rem 1rem; border-left: 4px solid #5687d8; background: color-mix(in srgb, Canvas 94%, #5687d8); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>School Database SQL</h1>
+    <p class="intro">SQLite schema, sample data, and queries for users, notes, and tags.</p>
+    <p class="callout"><strong>Entering data:</strong> Run the CREATE TABLE statements first, then the INSERT statements. Add a user, create notes with that user's ID, add tags, then link note and tag IDs in <code>note_tags</code>. This static page displays SQL; it does not itself save data or connect to a database.</p>
+    <h2>Tables and relationships</h2>
+    <p>Each note belongs to one user, so users and notes have a one-to-many relationship. Notes and tags have a many-to-many relationship represented by <code>note_tags</code>. Its composite primary key prevents duplicate note/tag links. Cascading foreign keys remove links when a note or tag is deleted.</p>
+    <p><a href="school.sql" download>Download school.sql</a></p>
+    <details open><summary>Show complete SQL, sample inserts, queries, and indexes</summary><pre><code>PRAGMA foreign_keys = ON;
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE notes (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE note_tags (
+    note_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    PRIMARY KEY (note_id, tag_id),
+    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
+
+-- Sample data: INSERT adds rows to the tables.
+INSERT INTO users (id, name, email) VALUES
+    (1, &#x27;Amina&#x27;, &#x27;amina@example.com&#x27;),
+    (2, &#x27;Brian&#x27;, &#x27;brian@example.com&#x27;),
+    (3, &#x27;Chao&#x27;, &#x27;chao@example.com&#x27;);
+
+INSERT INTO notes (id, user_id, text, created_at) VALUES
+    (1, 1, &#x27;Review database joins&#x27;, &#x27;2026-11-22 16:30:00&#x27;),
+    (2, 1, &#x27;Finish project outline&#x27;, &#x27;2026-11-23 09:15:00&#x27;),
+    (3, 2, &#x27;Buy lab notebook&#x27;, &#x27;2026-11-21 12:00:00&#x27;);
+
+INSERT INTO tags (id, name) VALUES
+    (1, &#x27;urgent&#x27;),
+    (2, &#x27;study&#x27;);
+
+INSERT INTO note_tags (note_id, tag_id) VALUES
+    (1, 1), (1, 2), (2, 2), (3, 1);
+
+-- Amina&#x27;s notes, newest first.
+SELECT notes.text, notes.created_at
+FROM notes
+JOIN users ON users.id = notes.user_id
+WHERE users.name = &#x27;Amina&#x27;
+ORDER BY notes.created_at DESC;
+
+-- All notes tagged urgent.
+SELECT notes.text
+FROM notes
+JOIN note_tags ON note_tags.note_id = notes.id
+JOIN tags ON tags.id = note_tags.tag_id
+WHERE tags.name = &#x27;urgent&#x27;;
+
+-- Number of notes for each user, including users with no notes.
+SELECT users.name, COUNT(notes.id) AS note_count
+FROM users
+LEFT JOIN notes ON notes.user_id = users.id
+GROUP BY users.id, users.name
+ORDER BY users.id;
+
+-- Indexes for Amina&#x27;s newest-first notes and lookup of note links by tag.
+CREATE INDEX idx_notes_user_created ON notes(user_id, created_at DESC);
+CREATE INDEX idx_note_tags_tag_note ON note_tags(tag_id, note_id);
+</code></pre></details>
+    <h2>Index choices</h2>
+    <ul>
+      <li><code>notes(user_id, created_at DESC)</code> helps find a user's notes newest first.</li>
+      <li><code>note_tags(tag_id, note_id)</code> helps find notes for a tag. The primary key starts with <code>note_id</code>, supporting the reverse join direction.</li>
+      <li>Primary keys and UNIQUE constraints already index IDs, user emails, and tag names.</li>
+    </ul>
+  </main>
+</body>
+</html>

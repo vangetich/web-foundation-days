@@ -1,25 +1,27 @@
 # School database design
 
-This design documents the SQLite schema in [`school.sql`](school.sql).
+This document describes the schema and sample data in [`school.sql`](school.sql). The script models a QuickNotes-style system with users, notes, and tags.
 
 ## Tables
 
-- **`students`** stores one row per student. `student_id` is the primary key; each student has a required name and a required, unique email address.
-- **`courses`** stores one row per course. `course_id` is the primary key, and `course_name` is required and unique.
-- **`enrolments`** records a student's enrolment in a course. Its primary key identifies each enrolment; `student_id` and `course_id` are required foreign keys, and `grade` records the result when available. The unique pair `(student_id, course_id)` prevents enrolling the same student in the same course twice.
+- **`users`** stores one row per user. `id` is the primary key; `name` and `email` are required, and email is unique.
+- **`notes`** stores each note's text and creation time. `id` is the primary key. Required `user_id` is a foreign key to `users`, so each note belongs to one user.
+- **`tags`** stores reusable labels. `id` is the primary key and each required tag `name` is unique.
+- **`note_tags`** links notes and tags. Its composite primary key `(note_id, tag_id)` identifies each link and prevents attaching the same tag to a note twice. Both columns are required foreign keys; `ON DELETE CASCADE` removes links when their note or tag is deleted.
 
 ## Relationships
 
-A student can have many enrolments, while each enrolment belongs to one student: this is a one-to-many relationship from `students` to `enrolments`. A course can also have many enrolments, while each enrolment belongs to one course: this is a one-to-many relationship from `courses` to `enrolments`. Taken together, students and courses have a many-to-many relationship: a student may take several courses, and a course may have several students. The `enrolments` table is the join table that resolves this many-to-many relationship into two one-to-many relationships. It also gives the relationship its own data, the grade, and a place to enforce the no-duplicate-enrolment rule.
+Users and notes have a one-to-many relationship: a user can have many notes, and each note belongs to one user. Notes and tags have a many-to-many relationship: a note can have multiple tags, and each tag can be used on multiple notes. `note_tags` is the join table that turns that relationship into two one-to-many relationships. It also prevents duplicate note/tag pairs.
 
-## Index
+## Indexes
 
-Add an index on `enrolments(course_id)`. The sample queries retrieve students on a course and count enrolments per course, so this index can help SQLite find enrolments by course efficiently. The unique constraint on `(student_id, course_id)` already creates an index whose leading column is `student_id`, which helps lookups by student; a separate `course_id` index supports the other direction.
+The script adds two indexes:
 
-```sql
-CREATE INDEX idx_enrolments_course_id ON enrolments(course_id);
-```
+- `notes(user_id, created_at DESC)` supports selecting one user's notes in newest-first order.
+- `note_tags(tag_id, note_id)` supports finding notes by tag. The composite primary key `(note_id, tag_id)` already supports traversing links starting from a note.
+
+Primary keys and unique constraints also create indexes for table IDs, user emails, and tag names. Indexes make lookups faster, with some extra storage and write work.
 
 ## SQL or NoSQL?
 
-I would choose a relational SQL database for this system. Students, courses, and enrolments have clear relationships, and enrolments need reliable foreign keys, unique constraints, and accurate counts across joined tables. SQL expresses the requested reports directly with joins and grouping, while the grade naturally belongs to the student-course relationship. A NoSQL database could work, but it would require more application-side coordination to preserve these relationships and constraints; its flexible document structure offers little advantage for this small, structured dataset.
+I would choose SQL for this system. The data has clear relationships, and foreign keys, unique constraints, and a composite key keep those relationships valid. SQL joins make it straightforward to retrieve a user's newest notes, find notes by tag, and count notes per user. A document database could store tags inside each note, but keeping shared tags and their links consistent would then take more application-side work.

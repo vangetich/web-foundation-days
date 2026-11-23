@@ -1,76 +1,71 @@
 PRAGMA foreign_keys = ON;
 
--- Entities: students, courses, and enrolments (the student-course relationship).
-CREATE TABLE students (
-    student_id INTEGER PRIMARY KEY,
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE courses (
-    course_id INTEGER PRIMARY KEY,
-    course_name TEXT NOT NULL UNIQUE
+CREATE TABLE notes (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE enrolments (
-    enrolment_id INTEGER PRIMARY KEY,
-    student_id INTEGER NOT NULL,
-    course_id INTEGER NOT NULL,
-    grade TEXT,
-    FOREIGN KEY (student_id) REFERENCES students(student_id),
-    FOREIGN KEY (course_id) REFERENCES courses(course_id),
-    UNIQUE (student_id, course_id)
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
 );
 
-INSERT INTO students (student_id, name, email) VALUES
-    (1, 'Amina Otieno', 'amina@example.com'),
-    (2, 'Brian Mwangi', 'brian@example.com'),
-    (3, 'Chao Wanjiku', 'chao@example.com'),
-    (4, 'David Kiptoo', 'david@example.com');
+CREATE TABLE note_tags (
+    note_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    PRIMARY KEY (note_id, tag_id),
+    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
 
-INSERT INTO courses (course_id, course_name) VALUES
-    (101, 'Biology'),
-    (102, 'Mathematics'),
-    (103, 'History');
+-- Sample data: INSERT adds rows to the tables.
+INSERT INTO users (id, name, email) VALUES
+    (1, 'Amina', 'amina@example.com'),
+    (2, 'Brian', 'brian@example.com'),
+    (3, 'Chao', 'chao@example.com');
 
-INSERT INTO enrolments (enrolment_id, student_id, course_id, grade) VALUES
-    (1001, 1, 101, 'A'),
-    (1002, 1, 102, 'B'),
-    (1003, 2, 101, 'B+'),
-    (1004, 2, 103, 'A-'),
-    (1005, 3, 102, 'A');
+INSERT INTO notes (id, user_id, text, created_at) VALUES
+    (1, 1, 'Review database joins', '2026-11-22 16:30:00'),
+    (2, 1, 'Finish project outline', '2026-11-23 09:15:00'),
+    (3, 2, 'Buy lab notebook', '2026-11-21 12:00:00');
 
--- 1. All courses for one student, selected by name.
-SELECT s.name AS student_name, c.course_name
-FROM students AS s
-JOIN enrolments AS e ON e.student_id = s.student_id
-JOIN courses AS c ON c.course_id = e.course_id
-WHERE s.name = 'Amina Otieno'
-ORDER BY c.course_name;
+INSERT INTO tags (id, name) VALUES
+    (1, 'urgent'),
+    (2, 'study');
 
--- 2. All students on one course.
-SELECT c.course_name, s.name AS student_name
-FROM courses AS c
-JOIN enrolments AS e ON e.course_id = c.course_id
-JOIN students AS s ON s.student_id = e.student_id
-WHERE c.course_name = 'Biology'
-ORDER BY s.name;
+INSERT INTO note_tags (note_id, tag_id) VALUES
+    (1, 1), (1, 2), (2, 2), (3, 1);
 
--- 3. Number of students per course, including courses with no enrolments.
-SELECT c.course_name, COUNT(e.student_id) AS student_count
-FROM courses AS c
-LEFT JOIN enrolments AS e ON e.course_id = c.course_id
-GROUP BY c.course_id, c.course_name
-ORDER BY c.course_name;
+-- Amina's notes, newest first.
+SELECT notes.text, notes.created_at
+FROM notes
+JOIN users ON users.id = notes.user_id
+WHERE users.name = 'Amina'
+ORDER BY notes.created_at DESC;
 
--- 4. Students who have no enrolments.
-SELECT s.student_id, s.name, s.email
-FROM students AS s
-LEFT JOIN enrolments AS e ON e.student_id = s.student_id
-WHERE e.enrolment_id IS NULL
-ORDER BY s.name;
+-- All notes tagged urgent.
+SELECT notes.text
+FROM notes
+JOIN note_tags ON note_tags.note_id = notes.id
+JOIN tags ON tags.id = note_tags.tag_id
+WHERE tags.name = 'urgent';
 
--- 5. Update one enrolment's grade.
-UPDATE enrolments
-SET grade = 'A-'
-WHERE enrolment_id = 1002;
+-- Number of notes for each user, including users with no notes.
+SELECT users.name, COUNT(notes.id) AS note_count
+FROM users
+LEFT JOIN notes ON notes.user_id = users.id
+GROUP BY users.id, users.name
+ORDER BY users.id;
+
+-- Indexes for Amina's newest-first notes and lookup of note links by tag.
+CREATE INDEX idx_notes_user_created ON notes(user_id, created_at DESC);
+CREATE INDEX idx_note_tags_tag_note ON note_tags(tag_id, note_id);
