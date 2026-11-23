@@ -1,47 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="script.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickNotes</title>
-  </head>
-  <body>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="api.js" defer></script>
+</head>
+<body>
+
     <header>
-      <h1>QuickNotes</h1>
-     <p><u>Capture ideas before they disappear.</u></p>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        </ul>
-      </nav>        
+        <h1>QuickNotes</h1>
+        <p><u>Capture ideas before they disappear.</u></p>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+        </nav>
     </header>
- 
+
     <main>
-      <section>
-        <h2>Add a note</h2>
-        <form id="note-form">
-          <label for="note-input" textarea rows="" cols=""></textarea>New note</label>
-          <input type="text" id="note-input" placeholder="Type a note..." />
-          <button type="submit">Add Note</button>
-        </form>
-      </section>
- 
-      <section>
-        <h2>Your notes</h2>
-        <p id="note-count">You have 2 notes.</p>
-        <p id="word-count">Total words: 10</p>
-        <p id="char-count">Total characters: 50</p> 
-        <ul id="notes-list">
-        <button id="clear-btn">Clear All Notes</button> 
-        <button id="theme-toggle">Delete Last Note</button>
-        </ul>
-      </section>
+        <section>
+            <h2>Notes Manager</h2>
+
+            <button id="load-btn" type="button">
+                Load Notes
+            </button>
+
+            <p id="status">
+                Ready to load notes.
+            </p>
+        </section>
+
+        <section>
+            <h2>Add a Note</h2>
+
+            <form id="note-form">
+                <div>
+                    <label for="title-input">Title</label>
+                    <input
+                        type="text"
+                        id="title-input"
+                        name="title"
+                        placeholder="Enter note title"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="body-input">Note Content</label>
+                    <textarea
+                        id="body-input"
+                        name="body"
+                        rows="5"
+                        placeholder="Write your note here..."
+                        required
+                    ></textarea>
+                </div>
+
+                <button id="submit-btn" type="submit">
+                    Save Note
+                </button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Your Notes</h2>
+
+            <ul id="notes-list"></ul>
+        </section>
     </main>
- 
+
     <footer>
-      <p>&copy; 2026 QuickNotes. Built during Web Foundations.</p>
+        <p>&copy; 2026 QuickNotes. Built during Web Foundations.</p>
     </footer>
-  </body>
+
+</body>
 </html>

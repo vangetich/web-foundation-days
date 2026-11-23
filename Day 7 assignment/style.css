@@ -1,10 +1,10 @@
-/* 1. Reset: predictable sizing and no default body margin */
+/* Reset: predictable sizing and no default body margin */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
- 
+
 body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
@@ -12,26 +12,37 @@ body {
   color: #222;
   line-height: 1.5;
 }
- 
-/* 2. Header */
+
+/* Header */
 header {
   background-color: #8e0000;
   color: white;
   text-align: center;
   padding: 24px 16px;
 }
- 
+
 header h1 {
   margin: 0;
 }
- 
-/* 3. Centre the main content and limit its width */
+
+header nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+header a {
+  color: white;
+}
+
+/* Centre the main content and limit its width */
 main {
   max-width: 640px;
-  margin: 24px auto;   /* auto left/right margins centre a block */
+  margin: 24px auto;
   padding: 0 16px;
 }
- 
+
 section {
   background: white;
   padding: 20px;
@@ -39,27 +50,39 @@ section {
   margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
- 
-/* 4. Form layout with Flexbox */
+
+/* Form layout */
 #note-form {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
- 
+
+#note-form > div {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 #note-form label {
-  width: 100%;          /* label on its own line */
+  width: 100%;
   font-weight: bold;
 }
- 
-#note-input {
-  flex: 1;
+
+#title-input,
+#body-input {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 1rem;
+  font: inherit;
 }
- 
+
+#body-input {
+  resize: vertical;
+}
+
 button {
   background-color: #0ba184;
   color: white;
@@ -69,17 +92,30 @@ button {
   font-size: 1rem;
   cursor: pointer;
 }
- 
+
 button:hover {
   background-color: #088a70;
 }
- 
-/* 5. Notes list */
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #1667a5;
+  outline-offset: 2px;
+}
+
+/* Notes list */
 #notes-list {
-  list-style: none;     /* remove bullet points */
+  list-style: none;
   padding: 0;
 }
- 
+
 .note {
   background-color: #fffbe6;
   border-left: 4px solid #0ba184;
@@ -87,34 +123,35 @@ button:hover {
   margin-bottom: 10px;
   border-radius: 6px;
 }
- 
-/* 6. Footer */
-footer {
-  text-align: center;
-  color: #777;
-  padding: 16px;
-}
- 
-/* 7. Phones */
-@media (max-width: 600px) {
-  #note-form {
-    flex-direction: column;
-  }
+
+#notes-list h3 {
+  margin: 0 0 6px;
 }
 
-.note {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+#notes-list p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
 }
- 
+
 .delete-btn {
   background-color: #8e0000;
   padding: 6px 12px;
   font-size: 0.85rem;
 }
- 
+
 .delete-btn:hover {
   background-color: #6b0000;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  color: #777;
+  padding: 16px;
+}
+
+@media (max-width: 600px) {
+  #note-form {
+    flex-direction: column;
+  }
 }
