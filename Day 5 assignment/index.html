@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library Books</title>
+    <script src="users.js" defer></script>
+    <style>
+      body {
+        max-width: 48rem;
+        margin: 3rem auto;
+        padding: 0 1.25rem;
+        color: #18212f;
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      h1 { margin-bottom: 0.4rem; }
+      .intro { margin-top: 0; color: #526174; }
+      .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1.5rem 0; }
+      label { display: grid; gap: 0.35rem; }
+      input, button { font: inherit; padding: 0.6rem 0.8rem; }
+      button { cursor: pointer; }
+      #status { min-height: 1.5em; color: #526174; }
+      #books-list { padding-left: 1.25rem; }
+      #books-list li { margin-bottom: 1rem; }
+      #books-list h2 { margin-bottom: 0.25rem; font-size: 1.15rem; }
+      #books-list p { margin: 0.15rem 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Library Books</h1>
+      <p class="intro">Browse the library catalog or find books by author.</p>
+
+      <div class="controls">
+        <button id="load-books" type="button">Load books</button>
+        <label for="author-filter">Author
+          <input id="author-filter" type="search" placeholder="Filter by author" />
+        </label>
+      </div>
+
+      <p id="status" role="status" aria-live="polite"></p>
+      <ul id="books-list"></ul>
+    </main>
+  </body>
+</html>
